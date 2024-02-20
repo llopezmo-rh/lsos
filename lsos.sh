@@ -6,9 +6,15 @@
 
 
 #!/bin/bash
-set -o errexit,nounset,pipefail
 
-export SYSTEMD_COLORS=false
+# Option pipefail unset because the script exits with return code 141 after the following line:
+# tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH
+# Reason: PIPEFAIL signal sent. More information on the links below:
+# https://stackoverflow.com/questions/19120263/why-exit-code-141-with-grep-q
+# https://stackoverflow.com/questions/33020759/piping-to-head-results-in-broken-pipe-in-shell-script-called-from-python
+# Alternatively, trap can be used
+#set -o errexit -o nounset -o pipefail
+set -o errexit -o nounset
 
 # Output lengths
 PS_LENGTH=1
@@ -17,6 +23,8 @@ LOG_LENGTH=1
 # Colours
 RED='\033[0;31m'
 NO_COLOUR='\033[0m'
+# Removing colours from journalctl outputs
+export SYSTEMD_COLORS=false
 
 if [ $# -ne 1 ]
 	then
@@ -61,7 +69,11 @@ echo -e "${RED}LOCAL STORAGE"
 echo -e "-------------${NO_COLOUR}"
 echo "Most relevant file systems:"
 grep -w '/' sos_commands/filesys/df_-al_-x_autofs
-grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/' || true
+#grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/' || true
+if ! grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/'
+	then
+	echo "Warning: /var file system not found" >&2
+	fi
 echo -e "\n"
 
 # Logs
@@ -77,7 +89,7 @@ if [ $(echo "$JOURNAL_FIND" | wc -l) -gt 1 ]
 if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	then
 	echo "Error: No system.journal file found" >&2
-    exit 7
+	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
 echo -e "\nLast error log line/s of crio unit:"
