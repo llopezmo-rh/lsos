@@ -33,6 +33,15 @@ if [ $# -ne 1 ]
 	fi
 cd $1
 
+
+# SYSTEM
+echo -e "${RED}SYSTEM"
+echo -e "------${NO_COLOUR}"
+OS_NAME=$(grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"')
+echo -e "Operating system:\n${OS_NAME}\n"
+KERNEL=$(uname -a)
+echo -e "Kernel:\n${KERNEL}\n"
+
 # CPU
 echo -e "${RED}CPU"
 echo -e "---${NO_COLOUR}"
