@@ -17,12 +17,13 @@
 set -o errexit -o nounset
 
 # Output lengths
-PS_LENGTH=1
-LOG_LENGTH=1
+readonly PS_LENGTH=1
+readonly LOG_LENGTH=1
 
 # Colours
-RED='\033[0;31m'
-NO_COLOUR='\033[0m'
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;92m'
+readonly NO_COLOUR='\033[0m'
 # Removing colours from journalctl outputs
 export SYSTEMD_COLORS=false
 
@@ -38,21 +39,21 @@ cd $1
 echo -e "${RED}SYSTEM"
 echo -e "------${NO_COLOUR}"
 OS_NAME=$(grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"')
-echo -e "Operating system:\n${OS_NAME}\n"
+echo -e "${GREEN}Operating system:${NO_COLOUR}\n${OS_NAME}\n"
 KERNEL=$(uname -a)
-echo -e "Kernel:\n${KERNEL}\n"
+echo -e "${GREEN}Kernel:${NO_COLOUR}\n${KERNEL}\n"
 
 # CPU
 echo -e "${RED}CPU"
 echo -e "---${NO_COLOUR}"
-echo "CPU load:"
+echo -e "${GREEN}CPU load:${NO_COLOUR}"
 cat uptime
 echo -n "Number of cores: "
 CORES=$(grep '^processor' proc/cpuinfo | tail -n 1 | awk '{print $3}')
 # The core count in proc/cpuinfo starts with zero. Therefore, adding 1
 CORES=$((${CORES}+1))
 echo "$CORES"
-echo -e "\nTop CPU-consuming process/es:"
+echo -e "\n${GREEN}Top CPU-consuming process/es${NO_COLOUR}:"
 head -n 1 ps
 tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH
 #sort -nr -k 3 ps | head -n $PS_LENGTH
@@ -61,13 +62,13 @@ echo -e "\n"
 # Memory
 echo -e "${RED}MEMORY"
 echo -e "------${NO_COLOUR}"
-echo "Memory load in MiB:"
+echo -e "${GREEN}Memory load in MiB:${NO_COLOUR}"
 cat 'sos_commands/memory/free_-m'
 USED_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $3}')
 TOTAL_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $2}')
 USED_MEMORY_PERCENT=$(echo "scale=10; $USED_MEMORY / $TOTAL_MEMORY *100" | bc -l)
 printf "Memory use: %.2f%% \n" $USED_MEMORY_PERCENT
-echo -e "\nTop memory-consuming process/es:"
+echo -e "\n${GREEN}Top memory-consuming process/es:${NO_COLOUR}"
 head -n 1 ps
 tail -n +2 ps | sort -nr -k 4 | head -n $PS_LENGTH
 #sort -nr -k 4 ps | head -n $PS_LENGTH
@@ -76,7 +77,7 @@ echo -e "\n"
 # Local storage
 echo -e "${RED}LOCAL STORAGE"
 echo -e "-------------${NO_COLOUR}"
-echo "Most relevant file systems:"
+echo -e "${GREEN}Most relevant file systems:${NO_COLOUR}"
 grep -w '/' sos_commands/filesys/df_-al_-x_autofs
 #grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/' || true
 if ! grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/'
@@ -101,15 +102,14 @@ if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
-echo -e "\nLast error log line/s of crio unit:"
+echo -e "\n${GREEN}Last error log line/s of crio unit:${NO_COLOUR}"
 journalctl -D "$JOURNAL_DIR" -u crio -p err -n $LOG_LENGTH 
-echo -e "\nLast error log line/s of kubelet unit:"
+echo -e "\n${GREEN}Last error log line/s of kubelet unit:${NO_COLOUR}"
 journalctl -D "$JOURNAL_DIR" -u kubelet -p err -n $LOG_LENGTH 
-echo -e "\nLast error log line/s of kernel:"
+echo -e "\n${GREEN}Last error log line/s of kernel:${NO_COLOUR}"
 journalctl -D "$JOURNAL_DIR" -t kernel -p err -n $LOG_LENGTH 
-echo
+echo -e "\n${GREEN}Commands to execute for complete logs:${NO_COLOUR}"
 cat <<-EOF
-	Commands to execute for complete logs:
 	journalctl -D "$JOURNAL_DIR" | less
 	journalctl -D "$JOURNAL_DIR" -u crio | less
 	journalctl -D "$JOURNAL_DIR" -u kubelet | less
