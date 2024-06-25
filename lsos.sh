@@ -38,13 +38,13 @@ cd $1
 # SYSTEM
 echo -e "${RED}SYSTEM"
 echo -e "------${NO_COLOUR}"
-OS_NAME=$(grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"')
-echo -e "${GREEN}Operating system:${NO_COLOUR}\n${OS_NAME}\n"
-KERNEL=$(uname -a)
-echo -e "${GREEN}Kernel:${NO_COLOUR}\n${KERNEL}\n"
+echo -e "${GREEN}Operating system:${NO_COLOUR}"
+grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"'
+echo -e "\n${GREEN}Kernel:${NO_COLOUR}"
+cat uname
 
 # CPU
-echo -e "${RED}CPU"
+echo -e "\n${RED}CPU"
 echo -e "---${NO_COLOUR}"
 echo -e "${GREEN}CPU load:${NO_COLOUR}"
 cat uptime
