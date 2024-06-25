@@ -103,11 +103,11 @@ if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
 echo -e "\n${GREEN}Last error log line/s of crio unit:${NO_COLOUR}"
-journalctl -D "$JOURNAL_DIR" -u crio -p err -n $LOG_LENGTH 
+journalctl -D "$JOURNAL_DIR" --no-pager -u crio -p err -n $LOG_LENGTH 
 echo -e "\n${GREEN}Last error log line/s of kubelet unit:${NO_COLOUR}"
-journalctl -D "$JOURNAL_DIR" -u kubelet -p err -n $LOG_LENGTH 
+journalctl -D "$JOURNAL_DIR" --no-pager -u kubelet -p err -n $LOG_LENGTH 
 echo -e "\n${GREEN}Last error log line/s of kernel:${NO_COLOUR}"
-journalctl -D "$JOURNAL_DIR" -t kernel -p err -n $LOG_LENGTH 
+journalctl -D "$JOURNAL_DIR" --no-pager -t kernel -p err -n $LOG_LENGTH 
 echo -e "\n${GREEN}Commands to execute for complete logs:${NO_COLOUR}"
 cat <<-EOF
 	journalctl -D "$JOURNAL_DIR" | less
