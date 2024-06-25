@@ -41,13 +41,13 @@ echo -e "------${NO_COLOUR}"
 echo -e "${GREEN}Operating system:${NO_COLOUR}"
 grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"'
 echo -e "\n${GREEN}Kernel:${NO_COLOUR}"
-cat uname
+cat 'uname'
 
 # CPU
 echo -e "\n${RED}CPU"
 echo -e "---${NO_COLOUR}"
 echo -e "${GREEN}CPU load:${NO_COLOUR}"
-cat uptime
+cat 'uptime'
 echo -n "Number of cores: "
 CORES=$(grep '^processor' proc/cpuinfo | tail -n 1 | awk '{print $3}')
 # The core count in proc/cpuinfo starts with zero. Therefore, adding 1
@@ -102,12 +102,12 @@ if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
-echo -e "\n${GREEN}Last error log line/s of crio unit:${NO_COLOUR}"
-journalctl -D "$JOURNAL_DIR" -u crio -p err -n $LOG_LENGTH 
+echo -e "${GREEN}Last error log line/s of crio unit:${NO_COLOUR}"
+journalctl -D "$JOURNAL_DIR" --no-pager -u crio -p err -n $LOG_LENGTH 
 echo -e "\n${GREEN}Last error log line/s of kubelet unit:${NO_COLOUR}"
-journalctl -D "$JOURNAL_DIR" -u kubelet -p err -n $LOG_LENGTH 
+journalctl -D "$JOURNAL_DIR" --no-pager -u kubelet -p err -n $LOG_LENGTH 
 echo -e "\n${GREEN}Last error log line/s of kernel:${NO_COLOUR}"
-journalctl -D "$JOURNAL_DIR" -t kernel -p err -n $LOG_LENGTH 
+journalctl -D "$JOURNAL_DIR" --no-pager -t kernel -p err -n $LOG_LENGTH 
 echo -e "\n${GREEN}Commands to execute for complete logs:${NO_COLOUR}"
 cat <<-EOF
 	journalctl -D "$JOURNAL_DIR" | less
