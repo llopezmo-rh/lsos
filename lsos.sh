@@ -41,13 +41,13 @@ echo -e "------${NO_COLOUR}"
 echo -e "${GREEN}Operating system:${NO_COLOUR}"
 grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"'
 echo -e "\n${GREEN}Kernel:${NO_COLOUR}"
-cat uname
+cat 'uname'
 
 # CPU
 echo -e "\n${RED}CPU"
 echo -e "---${NO_COLOUR}"
 echo -e "${GREEN}CPU load:${NO_COLOUR}"
-cat uptime
+cat 'uptime'
 echo -n "Number of cores: "
 CORES=$(grep '^processor' proc/cpuinfo | tail -n 1 | awk '{print $3}')
 # The core count in proc/cpuinfo starts with zero. Therefore, adding 1
