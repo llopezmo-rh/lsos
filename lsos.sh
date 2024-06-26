@@ -48,11 +48,10 @@ echo -e "\n${RED}CPU"
 echo -e "---${NO_COLOUR}"
 echo -e "${GREEN}CPU load:${NO_COLOUR}"
 cat 'uptime'
-echo -n "Number of cores: "
 CORES=$(grep '^processor' proc/cpuinfo | tail -n 1 | awk '{print $3}')
 # The core count in proc/cpuinfo starts with zero. Therefore, adding 1
 CORES=$((${CORES}+1))
-echo "$CORES"
+echo "Number of cores: $CORES"
 echo -e "\n${GREEN}Top CPU-consuming process/es${NO_COLOUR}:"
 head -n 1 ps
 tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH
