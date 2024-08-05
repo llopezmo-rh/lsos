@@ -6,15 +6,8 @@
 
 
 #!/bin/bash
+set -o errexit -o nounset -o pipefail
 
-# Option pipefail unset because the script exits with return code 141 after the following line:
-# tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH
-# Reason: PIPEFAIL signal sent. More information on the links below:
-# https://stackoverflow.com/questions/19120263/why-exit-code-141-with-grep-q
-# https://stackoverflow.com/questions/33020759/piping-to-head-results-in-broken-pipe-in-shell-script-called-from-python
-# Alternatively, trap can be used
-#set -o errexit -o nounset -o pipefail
-set -o errexit -o nounset
 
 # Output lengths
 readonly PS_LENGTH=1
@@ -54,7 +47,10 @@ CORES=$((${CORES}+1))
 echo "Number of cores: $CORES"
 echo -e "\n${GREEN}Top CPU-consuming process/es${NO_COLOUR}:"
 head -n 1 ps
-tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH
+# Adding "|| true" to avoid pipefail.
+# https://stackoverflow.com/questions/19120263/why-exit-code-141-with-grep-q
+# https://stackoverflow.com/questions/33020759/piping-to-head-results-in-broken-pipe-in-shell-script-called-from-python
+{ tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH;} || true
 #sort -nr -k 3 ps | head -n $PS_LENGTH
 echo -e "\n"
 
