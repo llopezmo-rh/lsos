@@ -5,9 +5,12 @@
 #You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>. 
 
 
-#!/bin/bash
+#!/bin/bash -x
 set -o errexit -o nounset -o pipefail
 
+# "|| true" has been added to the lines executing the command "tail" to avoid pipefail.
+# https://stackoverflow.com/questions/19120263/why-exit-code-141-with-grep-q
+# https://stackoverflow.com/questions/33020759/piping-to-head-results-in-broken-pipe-in-shell-script-called-from-python
 
 # Output lengths
 readonly PS_LENGTH=1
@@ -62,14 +65,14 @@ cd $1
 
 # SYSTEM
 echo_title "SYSTEM"
-echo_green -e "Operating system:"
+echo_green "Operating system:"
 grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"'
 echo_green "Kernel:"
 cat 'uname'
 
 # CPU
 echo_title "CPU"
-echo_green -e "CPU load:"
+echo_green "CPU load:"
 cat 'uptime'
 CORES=$(grep '^processor' proc/cpuinfo | tail -n 1 | awk '{print $3}')
 # The core count in proc/cpuinfo starts with zero. Therefore, adding 1
@@ -77,16 +80,13 @@ CORES=$((${CORES}+1))
 echo "Number of cores: $CORES"
 echo_green "\nTop CPU-consuming process/es:"
 head -n 1 ps
-# Adding "|| true" to avoid pipefail.
-# https://stackoverflow.com/questions/19120263/why-exit-code-141-with-grep-q
-# https://stackoverflow.com/questions/33020759/piping-to-head-results-in-broken-pipe-in-shell-script-called-from-python
-{ tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH;} || true
+{ tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH; } || true
 #sort -nr -k 3 ps | head -n $PS_LENGTH
 echo -e "\n"
 
 # Memory
 echo_title "MEMORY"
-echo_green -e "Memory load in MiB:"
+echo_green "Memory load in MiB:"
 cat 'sos_commands/memory/free_-m'
 USED_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $3}')
 TOTAL_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $2}')
@@ -94,13 +94,13 @@ USED_MEMORY_PERCENT=$(echo "scale=10; $USED_MEMORY / $TOTAL_MEMORY *100" | bc -l
 printf "Memory use: %.2f%% \n" $USED_MEMORY_PERCENT
 echo_green "\nTop memory-consuming process/es:"
 head -n 1 ps
-tail -n +2 ps | sort -nr -k 4 | head -n $PS_LENGTH
+{ tail -n +2 ps | sort -nr -k 4 | head -n $PS_LENGTH; } || true
 #sort -nr -k 4 ps | head -n $PS_LENGTH
 echo -e "\n"
 
 # Local storage
 echo_title "LOCAL STORAGE"
-echo_green -e "Most relevant file systems:"
+echo_green "Most relevant file systems:"
 grep -w '/' sos_commands/filesys/df_-al_-x_autofs
 #grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/' || true
 if ! grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/'
