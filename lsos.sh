@@ -20,6 +20,38 @@ readonly NO_COLOUR='\033[0m'
 # Removing colours from journalctl outputs
 export SYSTEMD_COLORS=false
 
+
+echo_title()
+	{
+	local i
+	local UNDERLINE_CHAR='-'
+	if [ $# -ne 1 ]
+		then
+		echo "Error: function called with missing argument" >&2
+		return 1
+		fi
+	local STR="$1"
+	local LENGTH=${#STR}
+	echo -e "${RED}${STR}"
+	for i in $(seq 1 $LENGTH)
+		do
+		echo -en "$UNDERLINE_CHAR"
+		done
+	echo -e "${NO_COLOUR}"
+	}
+
+echo_green()
+	{
+	if [ $# -ne 1 ]
+                then
+                echo "Error: function called with missing argument" >&2
+                return 1
+                fi
+        local STR="$1"
+	echo -e "${GREEN}${STR}${NO_COLOUR}"
+	}
+
+
 if [ $# -ne 1 ]
 	then
 	echo "Use: $0 <sosreport_directory>" >&2
@@ -29,23 +61,21 @@ cd $1
 
 
 # SYSTEM
-echo -e "${RED}SYSTEM"
-echo -e "------${NO_COLOUR}"
-echo -e "${GREEN}Operating system:${NO_COLOUR}"
+echo_title "SYSTEM"
+echo_green -e "Operating system:"
 grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"'
-echo -e "\n${GREEN}Kernel:${NO_COLOUR}"
+echo_green "Kernel:"
 cat 'uname'
 
 # CPU
-echo -e "\n${RED}CPU"
-echo -e "---${NO_COLOUR}"
-echo -e "${GREEN}CPU load:${NO_COLOUR}"
+echo_title "CPU"
+echo_green -e "CPU load:"
 cat 'uptime'
 CORES=$(grep '^processor' proc/cpuinfo | tail -n 1 | awk '{print $3}')
 # The core count in proc/cpuinfo starts with zero. Therefore, adding 1
 CORES=$((${CORES}+1))
 echo "Number of cores: $CORES"
-echo -e "\n${GREEN}Top CPU-consuming process/es${NO_COLOUR}:"
+echo_green "\nTop CPU-consuming process/es:"
 head -n 1 ps
 # Adding "|| true" to avoid pipefail.
 # https://stackoverflow.com/questions/19120263/why-exit-code-141-with-grep-q
@@ -55,24 +85,22 @@ head -n 1 ps
 echo -e "\n"
 
 # Memory
-echo -e "${RED}MEMORY"
-echo -e "------${NO_COLOUR}"
-echo -e "${GREEN}Memory load in MiB:${NO_COLOUR}"
+echo_title "MEMORY"
+echo_green -e "Memory load in MiB:"
 cat 'sos_commands/memory/free_-m'
 USED_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $3}')
 TOTAL_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $2}')
 USED_MEMORY_PERCENT=$(echo "scale=10; $USED_MEMORY / $TOTAL_MEMORY *100" | bc -l)
 printf "Memory use: %.2f%% \n" $USED_MEMORY_PERCENT
-echo -e "\n${GREEN}Top memory-consuming process/es:${NO_COLOUR}"
+echo_green "\nTop memory-consuming process/es:"
 head -n 1 ps
 tail -n +2 ps | sort -nr -k 4 | head -n $PS_LENGTH
 #sort -nr -k 4 ps | head -n $PS_LENGTH
 echo -e "\n"
 
 # Local storage
-echo -e "${RED}LOCAL STORAGE"
-echo -e "-------------${NO_COLOUR}"
-echo -e "${GREEN}Most relevant file systems:${NO_COLOUR}"
+echo_title "LOCAL STORAGE"
+echo_green -e "Most relevant file systems:"
 grep -w '/' sos_commands/filesys/df_-al_-x_autofs
 #grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/' || true
 if ! grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/'
@@ -82,8 +110,7 @@ if ! grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/'
 echo -e "\n"
 
 # Logs
-echo -e "${RED}LOGS"
-echo -e "----${NO_COLOUR}"
+echo_title "LOGS"
 JOURNAL_FIND=$(find . -name system.journal)
 if [ $(echo "$JOURNAL_FIND" | wc -l) -gt 1 ]
 	then
@@ -97,13 +124,13 @@ if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
-echo -e "${GREEN}Last error log line/s of crio unit:${NO_COLOUR}"
+echo_green "Last error log line/s of crio unit:"
 journalctl -D "$JOURNAL_DIR" --no-pager -u crio -p err -n $LOG_LENGTH 
-echo -e "\n${GREEN}Last error log line/s of kubelet unit:${NO_COLOUR}"
+echo_green "Last error log line/s of kubelet unit:"
 journalctl -D "$JOURNAL_DIR" --no-pager -u kubelet -p err -n $LOG_LENGTH 
-echo -e "\n${GREEN}Last error log line/s of kernel:${NO_COLOUR}"
+echo_green "Last error log line/s of kernel:"
 journalctl -D "$JOURNAL_DIR" --no-pager -t kernel -p err -n $LOG_LENGTH 
-echo -e "\n${GREEN}Commands to execute for complete logs:${NO_COLOUR}"
+echo_green "Commands to execute for complete logs:"
 cat <<-EOF
 	journalctl -D "$JOURNAL_DIR" | less
 	journalctl -D "$JOURNAL_DIR" -u crio | less
