@@ -32,7 +32,7 @@ echo_title()
 	if [ $# -ne 1 ]
 		then
 		echo "Error: function called with missing argument" >&2
-		return 1
+		return 22
 		fi
 	local STR="$1"
 	local LENGTH=${#STR}
@@ -112,16 +112,16 @@ echo -e "\n"
 
 # Logs
 echo_title "LOGS"
-JOURNAL_FIND=$(find . -name system.journal)
+JOURNAL_FIND=$(find ./var -name system.journal)
 if [ $(echo "$JOURNAL_FIND" | wc -l) -gt 1 ]
 	then
-	echo "Error: multiple system.journal files found:" >&2
+	echo "Error: multiple system.journal files found in var directory:" >&2
 	echo "$JOURNAL_FIND" >&2
 	exit 7
 	fi
 if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	then
-	echo "Error: No system.journal file found" >&2
+	echo "Error: No system.journal file found in var directory" >&2
 	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
