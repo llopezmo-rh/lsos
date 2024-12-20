@@ -66,14 +66,15 @@ cd $1
 
 # SYSTEM
 echo_title "SYSTEM"
-echo_green "Operating system:"
+echo_green "\nOperating system:"
 grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"'
-echo_green "Kernel:"
+echo_green "\nKernel:"
 cat 'uname'
+echo -e "\n"
 
 # CPU
 echo_title "CPU"
-echo_green "CPU load:"
+echo_green "\nCPU load:"
 cat 'uptime'
 CORES=$(grep '^processor' proc/cpuinfo | tail -n 1 | awk '{print $3}')
 # The core count in proc/cpuinfo starts with zero. Therefore, adding 1
@@ -87,7 +88,7 @@ echo -e "\n"
 
 # Memory
 echo_title "MEMORY"
-echo_green "Memory load in MiB:"
+echo_green "\nMemory load in MiB:"
 cat 'sos_commands/memory/free_-m'
 USED_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $3}')
 TOTAL_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $2}')
@@ -101,7 +102,7 @@ echo -e "\n"
 
 # Local storage
 echo_title "LOCAL STORAGE"
-echo_green "Most relevant file systems:"
+echo_green "\nMost relevant file systems:"
 grep -w '/' sos_commands/filesys/df_-al_-x_autofs
 #grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/' || true
 if ! grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/'
@@ -125,13 +126,13 @@ if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
-echo_green "Last error log line/s of crio unit:"
+echo_green "\nLast error log line/s of crio unit:"
 journalctl -D "$JOURNAL_DIR" --no-pager -u crio -p err -n $LOG_LENGTH 
-echo_green "Last error log line/s of kubelet unit:"
+echo_green "\nLast error log line/s of kubelet unit:"
 journalctl -D "$JOURNAL_DIR" --no-pager -u kubelet -p err -n $LOG_LENGTH 
-echo_green "Last error log line/s of kernel:"
+echo_green "\nLast error log line/s of kernel:"
 journalctl -D "$JOURNAL_DIR" --no-pager -t kernel -p err -n $LOG_LENGTH 
-echo_green "Commands to execute for complete logs:"
+echo_green "\nCommands to execute for complete logs:"
 cat <<-EOF
 	journalctl -D "$JOURNAL_DIR" | less
 	journalctl -D "$JOURNAL_DIR" -u crio | less
