@@ -49,7 +49,7 @@ echo_green()
 	if [ $# -ne 1 ]
                 then
                 echo "Error: function called with missing argument" >&2
-                return 1
+                return 22
                 fi
         local STR="$1"
 	echo -e "${GREEN}${STR}${NO_COLOUR}"
