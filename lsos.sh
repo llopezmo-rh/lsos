@@ -126,12 +126,12 @@ if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
-LOG_LINES=$(journalctl -D "$JOURNAL_DIR" --no-pager | wc -l)
+#LOG_LINES=$(journalctl -D "$JOURNAL_DIR" --no-pager | wc -l)
 LOG_LINES_ERR=$(journalctl -D "$JOURNAL_DIR" --no-pager -p err | wc -l)
-LOG_ERR_PERCENTAGE=$(echo "scale=10; $LOG_LINES_ERR / $LOG_LINES * 100" | bc -l)
+#LOG_ERR_PERCENTAGE=$(echo "scale=10; $LOG_LINES_ERR / $LOG_LINES * 100" | bc -l)
 echo_green "\nNumber of error log lines:"
 echo "Total: $LOG_LINES_ERR"
-printf "Percentage: %.1f%% \n" $LOG_ERR_PERCENTAGE
+#printf "Percentage: %.1f%% \n" $LOG_ERR_PERCENTAGE
 echo_green "\nLast error log line/s:"
 journalctl -D "$JOURNAL_DIR" --no-pager -p err -n $LOG_LENGTH 
 echo_green "\nLast error log line/s of crio unit:"
