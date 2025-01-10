@@ -92,7 +92,7 @@ echo_green "\nMemory load in MiB:"
 cat 'sos_commands/memory/free_-m'
 USED_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $3}')
 TOTAL_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $2}')
-USED_MEMORY_PERCENT=$(echo "scale=10; $USED_MEMORY / $TOTAL_MEMORY *100" | bc -l)
+USED_MEMORY_PERCENT=$(echo "scale=10; $USED_MEMORY / $TOTAL_MEMORY * 100" | bc -l)
 printf "Memory use: %.2f%% \n" $USED_MEMORY_PERCENT
 echo_green "\nTop memory-consuming process/es:"
 head -n 1 ps
@@ -126,6 +126,14 @@ if [ -z "$JOURNAL_FIND" ] || [ $(echo "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
+#LOG_LINES=$(journalctl -D "$JOURNAL_DIR" --no-pager | wc -l)
+LOG_LINES_ERR=$(journalctl -D "$JOURNAL_DIR" --no-pager -p err | wc -l)
+#LOG_ERR_PERCENTAGE=$(echo "scale=10; $LOG_LINES_ERR / $LOG_LINES * 100" | bc -l)
+echo_green "\nNumber of error log lines:"
+echo "Total: $LOG_LINES_ERR"
+#printf "Percentage: %.1f%% \n" $LOG_ERR_PERCENTAGE
+echo_green "\nLast error log line/s:"
+journalctl -D "$JOURNAL_DIR" --no-pager -p err -n $LOG_LENGTH 
 echo_green "\nLast error log line/s of crio unit:"
 journalctl -D "$JOURNAL_DIR" --no-pager -u crio -p err -n $LOG_LENGTH 
 echo_green "\nLast error log line/s of kubelet unit:"
