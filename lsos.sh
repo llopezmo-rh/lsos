@@ -13,6 +13,9 @@ set -o errexit -o nounset -o pipefail
 # https://stackoverflow.com/questions/19120263/why-exit-code-141-with-grep-q
 # https://stackoverflow.com/questions/33020759/piping-to-head-results-in-broken-pipe-in-shell-script-called-from-python
 
+# If the used memory percentage is greater or equal, a warning will be shown
+readonly MEMORY_WARNING=80
+
 # Output lengths
 readonly PS_LENGTH=1
 readonly LOG_LENGTH=1
@@ -105,7 +108,13 @@ cat 'sos_commands/memory/free_-m'
 USED_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $3}')
 TOTAL_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $2}')
 USED_MEMORY_PERCENT=$(printf "scale=10; $USED_MEMORY / $TOTAL_MEMORY * 100" | bc -l)
-printf_red "Memory use: %.2f%% \n" $USED_MEMORY_PERCENT
+printf "Memory use: "
+if [ $USED_MEMORY_PERCENT -ge $MEMORY_WARNING ]
+	then
+	printf_red "%.2f%% (WARNING!)\n" $USED_MEMORY_PERCENT
+else	
+	printf "%.2f%%\n" $USED_MEMORY_PERCENT
+	fi
 printf_green "\nTop memory-consuming process/es:"
 head -n 1 ps
 { tail -n +2 ps | sort -nr -k 4 | head -n $PS_LENGTH; } || true
