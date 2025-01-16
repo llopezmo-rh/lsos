@@ -32,7 +32,7 @@ printf_title()
 	{
 	local i
 	local UNDERLINE_CHAR='-'
-	if [ $# -ne 1 ]
+	if [ $# -eq 0 ]
 		then
 		printf "Error: function called with missing argument\n" >&2
 		return 22
@@ -49,7 +49,7 @@ printf_title()
 
 printf_green()
 	{
-	if [ $# -ne 1 ]
+	if [ $# -eq 0 ]
                 then
                 printf "Error: function called with missing argument\n" >&2
                 return 22
@@ -61,7 +61,7 @@ printf_green()
 
 printf_red()
 	{
-	if [ $# -ne 1 ]
+	if [ $# -eq 0 ]
                 then
                 printf "Error: function called with missing argument\n" >&2
                 return 22
