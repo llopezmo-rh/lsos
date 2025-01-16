@@ -39,7 +39,7 @@ printf_title()
 		fi
 	local STR="$1"
 	local LENGTH=${#STR}
-	printf "${RED}${STR}"
+	printf "${RED}${STR}\n"
 	for i in $(seq 1 $LENGTH)
 		do
 		printf "$UNDERLINE_CHAR"
@@ -99,7 +99,7 @@ printf_green "\nTop CPU-consuming process/es:"
 head -n 1 ps
 { tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH; } || true
 #sort -nr -k 3 ps | head -n $PS_LENGTH
-printf -e "\n\n"
+printf "\n\n"
 
 # Memory
 printf_title "MEMORY"
@@ -107,9 +107,9 @@ printf_green "\nMemory load in MiB:"
 cat 'sos_commands/memory/free_-m'
 USED_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $3}')
 TOTAL_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $2}')
-USED_MEMORY_PERCENT=$(printf "scale=10; $USED_MEMORY / $TOTAL_MEMORY * 100" | bc -l)
+USED_MEMORY_PERCENT=$(echo "scale=10; $USED_MEMORY / $TOTAL_MEMORY * 100" | bc --mathlib)
 printf "Memory use: "
-if [ $USED_MEMORY_PERCENT -ge $MEMORY_WARNING ]
+if echo "$USED_MEMORY_PERCENT >= $MEMORY_WARNING" | bc --mathlib >/dev/null
 	then
 	printf_red "%.2f%% (WARNING!)\n" $USED_MEMORY_PERCENT
 else	
@@ -119,7 +119,7 @@ printf_green "\nTop memory-consuming process/es:"
 head -n 1 ps
 { tail -n +2 ps | sort -nr -k 4 | head -n $PS_LENGTH; } || true
 #sort -nr -k 4 ps | head -n $PS_LENGTH
-printf -e "\n\n"
+printf "\n\n"
 
 # Local storage
 printf_title "LOCAL STORAGE"
@@ -130,7 +130,7 @@ if ! grep -w '/var' sos_commands/filesys/df_-al_-x_autofs | grep -Fv '/var/'
 	then
 	printf "Warning: /var file system not found\n" >&2
 	fi
-printf -e "\n\n"
+printf "\n\n"
 
 # Logs
 printf_title "LOGS"
