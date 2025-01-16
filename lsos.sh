@@ -109,7 +109,7 @@ USED_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $3}')
 TOTAL_MEMORY=$(grep -w '^Mem:' 'sos_commands/memory/free_-m' | awk '{print $2}')
 USED_MEMORY_PERCENT=$(echo "scale=10; $USED_MEMORY / $TOTAL_MEMORY * 100" | bc --mathlib)
 printf "Memory use: "
-if echo "$USED_MEMORY_PERCENT >= $MEMORY_WARNING" | bc --mathlib >/dev/null
+if (( $(echo "$USED_MEMORY_PERCENT >= $MEMORY_WARNING" | bc --mathlib) ))
 	then
 	printf_red "%.2f%% (WARNING!)\n" $USED_MEMORY_PERCENT
 else	
