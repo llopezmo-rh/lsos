@@ -84,10 +84,8 @@ printf "\n\n"
 printf_title "CPU"
 printf_green "\nCPU load:"
 cat 'uptime'
-CORES=$(grep '^processor' proc/cpuinfo | tail -n 1 | awk '{print $3}')
-# The core count in proc/cpuinfo starts with zero. Therefore, adding 1
-CORES=$((${CORES}+1))
-printf "Number of cores: ${CORES}\n"
+printf "Number of cores: "
+awk '/^processor/{n=$3} END{print n+1}' proc/cpuinfo
 printf_green "\nTop CPU-consuming process/es:"
 head -n 1 ps
 { tail -n +2 ps | sort -nr -k 3 | head -n $PS_LENGTH; } || true
