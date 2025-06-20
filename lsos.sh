@@ -30,7 +30,6 @@ export SYSTEMD_COLORS=false
 
 printf_title()
 	{
-	local i
 	local UNDERLINE_CHAR='-'
 	if [ $# -eq 0 ]
 		then
@@ -38,37 +37,31 @@ printf_title()
 		return 22
 		fi
 	local STR="$1"
-	local LENGTH=${#STR}
-	printf "${RED}${STR}\n"
-	for i in $(seq 1 $LENGTH)
-		do
-		printf "$UNDERLINE_CHAR"
-		done
-	printf "${NO_COLOUR}\n"
+	printf "${RED}${STR}\n${STR//?/$UNDERLINE_CHAR}${NO_COLOUR}\n"
 	}
 
 printf_green()
 	{
 	if [ $# -eq 0 ]
-                then
-                printf "Error: function called with missing argument\n" >&2
-                return 22
-                fi
-        local STR="$1"
+		then
+		printf "Error: function called with missing argument\n" >&2
+		return 22
+		fi
+	local STR="$1"
 	local ARGS="${@:2}"
-        printf "${GREEN}${STR}${NO_COLOUR}\n" $ARGS	
+	printf "${GREEN}${STR}${NO_COLOUR}\n" $ARGS	
 	}
 
 printf_red()
 	{
 	if [ $# -eq 0 ]
-                then
-                printf "Error: function called with missing argument\n" >&2
-                return 22
-                fi
-        local STR="$1"
+		then
+		printf "Error: function called with missing argument\n" >&2
+		return 22
+		fi
+	local STR="$1"
 	local ARGS="${@:2}"
-        printf "${RED}${STR}${NO_COLOUR}\n" $ARGS	
+	printf "${RED}${STR}${NO_COLOUR}\n" $ARGS	
 	}
 
 if [ $# -ne 1 ]
