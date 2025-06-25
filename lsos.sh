@@ -134,7 +134,11 @@ if [ $(printf "$JOURNAL_FIND" | wc -l) -gt 1 ]
 	fi
 if [ -z "$JOURNAL_FIND" ] || [ $(printf "$JOURNAL_FIND" | wc -l) -eq 0 ]
 	then
-	printf "Error: No system.journal file found in var directory\n" >&2
+	cat <<-EOF >&2
+		Error: No system.journal file found in var directory.
+		To get the Systemd journal logs, use the SOS Report option "--all-logs".
+		For RHEL CoreOS, the options "-k crio.all=on" and "-k crio.logs=on" can be also added
+		EOF
 	exit 7
 	fi
 JOURNAL_DIR=$(readlink -e "$(dirname "$JOURNAL_FIND")")
