@@ -74,6 +74,8 @@ cd $1
 
 # SYSTEM
 printf_title "SYSTEM"
+printf_green "\nHostname:"
+cat hostname
 printf_green "\nOperating system:"
 grep -w "^PRETTY_NAME" etc/os-release | awk -F '=' '{print $2}' | tr -d '"'
 printf_green "\nKernel:"
